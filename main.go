@@ -1,27 +1,27 @@
 package main
 
 import (
-	"errors"
+	// "errors"
 	"fmt"
 	"time"
 )
 
-type Gender int
+type Gender string
 
 const (
-	Male Gender = iota
-	Female
+	M Gender = "M"
+	F        = "F"
 )
 
-type Country int
+type Country string
 
 const (
-	JP Country = iota
-	TW
-	US
-	BR
-	SA
-	FR
+	JP Country = "JP"
+	TW         = "TW"
+	US         = "US"
+	BR         = "BR"
+	SA         = "SA"
+	FR         = "FR"
 )
 
 type Platform int
@@ -32,43 +32,21 @@ const (
 	web
 )
 
-type Conditions struct {
-	age      uint8
-	gender   Gender
-	country  Country
-	platform Platform
-}
-
-func (c *Conditions) SetAge(age uint8) error {
-	if age < 1 || age > 100 {
-		return errors.New("Value must be between 1 and 100")
-	}
-	c.age = age
-	return nil
-}
-
-func (c *Conditions) SetGender(gender Gender) error {
-	c.gender = gender
-	return nil
-}
-
-func (c *Conditions) SetCountry(country Country) error {
-	c.country = country
-	return nil
-}
-
-func (c *Conditions) SetPlatform(platform Platform) error {
-	c.platform = platform
-	return nil
+type Settings struct {
+	AgeStart        uint8      `json:"ageStart"`
+	AgeEnd          uint8      `json:"ageEnd"`
+	TargetGender    []Gender   `json:"gender"`
+	TargetCountries []Country  `json:"countries"`
+	TargetPlatforms []Platform `json:"platforms"`
 }
 
 type SponsoredPost struct {
-	title      string
-	startAt    time.Time
-	endAt      time.Time
-	conditions Conditions
+	Title      string    `json:"title"`
+	StartAt    time.Time `json:"startAt"`
+	EndAt      time.Time `json:"endAt"`
+	Conditions Settings  `json:"conditions"`
 }
 
 func main() {
-	fmt.Println("Hello world.")
+	println("hello world")
 }
