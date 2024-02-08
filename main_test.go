@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	// "github.com/go-playground/validator/v10"
 	"github.com/stretchr/testify/require"
 )
 
@@ -30,6 +31,31 @@ func TestMarshallNormalPost(t *testing.T) {
 	data, err := json.Marshal(normal_post)
 	t.Log(string(data))
 	require.NoError(t, err)
+
+}
+
+func TestUnmarshallInvalidPost(t *testing.T) {
+	// startTime, _ := time.Parse(time.RFC3339, "2024-02-07T14:00:00Z")
+	data := `
+  { 
+    "startAt":"2024-02-07T14:00:00Z",
+    "endAt":"2024-02-08T14:00:00Z",
+    "conditions": {
+      "ageStart":20,
+      "ageEnd":35,
+      "gender":["M","F"],
+      "countries":["JP","FR"],
+      "platforms":["iOS","android"]
+    }
+  }`
+	var post SponsoredPost
+	err := json.Unmarshal([]byte(data), &post)
+	t.Log(post)
+	require.NoError(t, err)
+
+	err = post.Validate()
+	// err = validator.New().Struct(post)
+	require.Error(t, err)
 
 }
 

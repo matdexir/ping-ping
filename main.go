@@ -3,6 +3,7 @@ package main
 import (
 	// "errors"
 	// "fmt"
+	"github.com/go-playground/validator/v10"
 	"time"
 )
 
@@ -33,18 +34,28 @@ const (
 )
 
 type Settings struct {
-	AgeStart        uint8      `json:"ageStart"`
-	AgeEnd          uint8      `json:"ageEnd"`
+	AgeStart        uint8      `json:"ageStart" validate:"gte=1,lte=125"`
+	AgeEnd          uint8      `json:"ageEnd" validate:"gte=1,lte=125"`
 	TargetGender    []Gender   `json:"gender"`
 	TargetCountries []Country  `json:"countries"`
 	TargetPlatforms []Platform `json:"platforms"`
 }
 
+func (s *Settings) Validate() error {
+	validate := validator.New()
+	return validate.Struct(s)
+}
+
 type SponsoredPost struct {
-	Title      string    `json:"title"`
-	StartAt    time.Time `json:"startAt"`
-	EndAt      time.Time `json:"endAt"`
+	Title      string    `json:"title" validate:"required"`
+	StartAt    time.Time `json:"startAt" validate:"required"`
+	EndAt      time.Time `json:"endAt" validate:"required"`
 	Conditions Settings  `json:"conditions"`
+}
+
+func (sp *SponsoredPost) Validate() error {
+	validate := validator.New()
+	return validate.Struct(sp)
 }
 
 func main() {
