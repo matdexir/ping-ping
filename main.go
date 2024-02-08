@@ -34,8 +34,8 @@ const (
 )
 
 type Settings struct {
-	AgeStart        uint8      `json:"ageStart" validate:"gte=1,lte=125"`
-	AgeEnd          uint8      `json:"ageEnd" validate:"gte=1,lte=125"`
+	AgeStart        uint8      `json:"ageStart" validate:"ltecsfield=AgeEnd,gte=1,lte=125"`
+	AgeEnd          uint8      `json:"ageEnd" validate:"gtecsfield=AgeStart,gte=1,lte=125"`
 	TargetGender    []Gender   `json:"gender"`
 	TargetCountries []Country  `json:"countries"`
 	TargetPlatforms []Platform `json:"platforms"`
@@ -48,9 +48,9 @@ func (s *Settings) Validate() error {
 
 type SponsoredPost struct {
 	Title      string    `json:"title" validate:"required"`
-	StartAt    time.Time `json:"startAt" validate:"required"`
-	EndAt      time.Time `json:"endAt" validate:"required"`
-	Conditions Settings  `json:"conditions"`
+	StartAt    time.Time `json:"startAt" validate:"required,ltecsfield=EndAt"`
+	EndAt      time.Time `json:"endAt" validate:"required,gtecsfield=StartAt"`
+	Conditions Settings  `json:"conditions,omitempty"`
 }
 
 func (sp *SponsoredPost) Validate() error {
