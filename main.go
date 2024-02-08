@@ -2,7 +2,7 @@ package main
 
 import (
 	// "errors"
-	"fmt"
+	// "fmt"
 	"time"
 )
 
@@ -24,12 +24,12 @@ const (
 	FR         = "FR"
 )
 
-type Platform int
+type Platform string
 
 const (
-	android Platform = iota
-	iOS
-	web
+	ANDROID Platform = "android"
+	iOS              = "iOS"
+	WEB              = "web"
 )
 
 type Settings struct {
