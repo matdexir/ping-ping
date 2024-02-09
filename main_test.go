@@ -53,7 +53,8 @@ func TestUnmarshallNormalPost(t *testing.T) {
 	expectedEnd, _ := time.Parse(time.RFC3339, "2024-02-08T14:00:00Z")
 
 	var post SponsoredPost
-	json.Unmarshal([]byte(data), &post)
+	err := json.Unmarshal([]byte(data), &post)
+	require.NoError(t, err)
 	require.Equal(t, post.Title, "post1")
 	require.Equal(t, post.StartAt, expectedStart)
 	require.Equal(t, post.EndAt, expectedEnd)
@@ -134,7 +135,7 @@ func TestUnmarshallAgeOutOfBounds(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", idx), func(t *testing.T) {
 			err := json.Unmarshal([]byte(td), &post)
 			// t.Log(post)
-			// require.NoError(t, err)
+			require.NoError(t, err)
 			err = post.Validate()
 			// t.Log(err)
 			require.Error(t, err)

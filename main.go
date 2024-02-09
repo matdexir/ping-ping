@@ -12,26 +12,26 @@ type Gender string
 
 const (
 	M Gender = "M"
-	F        = "F"
+	F Gender = "F"
 )
 
 type Country string
 
 const (
 	JP Country = "JP"
-	TW         = "TW"
-	US         = "US"
-	BR         = "BR"
-	SA         = "SA"
-	FR         = "FR"
+	TW Country = "TW"
+	US Country = "US"
+	BR Country = "BR"
+	SA Country = "SA"
+	FR Country = "FR"
 )
 
 type Platform string
 
 const (
 	ANDROID Platform = "android"
-	iOS              = "iOS"
-	WEB              = "web"
+	iOS     Platform = "iOS"
+	WEB     Platform = "web"
 )
 
 type Settings struct {
