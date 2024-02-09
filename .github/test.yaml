@@ -1,0 +1,48 @@
+# I don't want to run it on my machine
+name: Linting and Testing
+
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  linting: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup golang
+        uses: actions/setup-go@v5
+        with: 
+          go-version: "^1"
+
+      - name: Checkout project
+        uses: actions/checkout@v4
+
+      - name: Setup golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --verbose
+    
+  test-linux:
+    runs-on: ubuntu-latest
+    container: golang:1.21-alpine
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install git and make
+        run: |
+          apk add git make curl perl bash build-base
+
+      - name: Run tests
+        run: |
+          make test
+
+
+
+
