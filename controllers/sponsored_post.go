@@ -6,74 +6,15 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/matdexir/ping-ping/db"
+	"github.com/matdexir/ping-ping/models"
 
 	"github.com/labstack/echo/v4"
 )
 
-type Gender = string
-
-const (
-	M Gender = "M"
-	F Gender = "F"
-	A Gender = "ALL"
-)
-
-type Country = string
-
-const (
-	JP  Country = "JP"
-	TW  Country = "TW"
-	US  Country = "US"
-	BR  Country = "BR"
-	SA  Country = "SA"
-	FR  Country = "FR"
-	ALL Country = "ALL"
-)
-
-type Platform = string
-
-const (
-	ANDROID Platform = "android"
-	iOS     Platform = "iOS"
-	WEB     Platform = "web"
-)
-
-type SponsoredPost struct {
-	Title      string    `json:"title" validate:"required"`
-	StartAt    time.Time `json:"startAt" validate:"required,ltecsfield=EndAt"`
-	EndAt      time.Time `json:"endAt" validate:"required,gtecsfield=StartAt"`
-	Conditions Settings  `json:"conditions,omitempty"`
-}
-
-type Settings struct {
-	AgeStart       uint64   `json:"ageStart" validate:"ltecsfield=AgeEnd,gte=1,lte=125"`
-	AgeEnd         uint64   `json:"ageEnd" validate:"gtecsfield=AgeStart,gte=1,lte=125"`
-	TargetGender   Gender   `json:"gender"`
-	TargetCountry  Country  `json:"countries"`
-	TargetPlatform Platform `json:"platforms"`
-}
-
-func (s *Settings) Validate() error {
-	validate := validator.New()
-	return validate.Struct(s)
-}
-
-func (sp *SponsoredPost) Validate() error {
-	validate := validator.New()
-	return validate.Struct(sp)
-}
-
-type InsertedPost struct {
-	ID   int64
-	Post *SponsoredPost
-}
-
 func CreateSponsoredPost(c echo.Context) error {
-	var sp SponsoredPost
+	var sp models.SponsoredPost
 	if err := c.Bind(sp); err != nil {
 		return err
 	}
@@ -92,15 +33,10 @@ func CreateSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Insert failed")
 	}
 
-	insertedPost := InsertedPost{
+	insertedPost := models.InsertedPost{
 		ID: id, Post: &sp}
 
 	return c.JSON(http.StatusOK, insertedPost)
-}
-
-type Post struct {
-	title string
-	endAt time.Time
 }
 
 func GetSponsoredPost(c echo.Context) error {
@@ -134,10 +70,10 @@ func GetSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Unable to query")
 	}
 
-	posts := []Post{}
+	posts := []models.QueryItems{}
 
 	for row.Next() {
-		var post SponsoredPost
+		var post models.SponsoredPost
 		err := row.Scan(&post.Title, &post.EndAt, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &post.Conditions.TargetGender, &post.Conditions.TargetCountry, &post.Conditions.TargetPlatform)
 
 		if err != nil {
@@ -163,7 +99,7 @@ func GetSponsoredPost(c echo.Context) error {
 			}
 		}
 
-		tmp := Post{title: post.Title, endAt: post.EndAt}
+		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
 
 		posts = append(posts, tmp)
 	}

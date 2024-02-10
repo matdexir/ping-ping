@@ -2,17 +2,11 @@ package main
 
 import (
 	"os"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/matdexir/ping-ping/controllers"
 	"github.com/matdexir/ping-ping/db"
 )
-
-type QueryItems struct {
-	Title string    `json:"title" validate:"required"`
-	EndAt time.Time `json:"endAt" validate:"required"`
-}
 
 func main() {
 	e := echo.New()
