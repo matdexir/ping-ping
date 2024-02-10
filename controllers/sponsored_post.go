@@ -1,10 +1,12 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
-	"os"
+	// "os"
 	"strconv"
 
 	"github.com/matdexir/ping-ping/db"
@@ -13,19 +15,29 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func GetRAWJSON(body io.ReadCloser) map[string]interface{} {
+	jsonBody := make(map[string]interface{})
+	_ = json.NewDecoder(body).Decode(&jsonBody)
+
+	return jsonBody
+
+}
+
 func CreateSponsoredPost(c echo.Context) error {
-	var sp models.SponsoredPost
-	if err := c.Bind(sp); err != nil {
-		return err
+	sp := models.SponsoredPost{}
+	if err := c.Bind(&sp); err != nil {
+		log.Printf("%v", GetRAWJSON(c.Request().Body))
+		return c.String(http.StatusBadRequest, "Unable to unmarshal json")
 	}
 
 	db, _ := db.CreateConnection()
 	defer db.Close()
 
-	sqlStatement := `INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)`
-	res, err := db.Database.Exec(sqlStatement, &sp.Title, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &sp.Conditions.TargetGender, &sp.Conditions.TargetCountry, &sp.Conditions.TargetPlatform)
+	sqlStatement := `INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?)`
+	res, err := db.Database.Exec(sqlStatement, &sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &sp.Conditions.TargetGender, &sp.Conditions.TargetCountry, &sp.Conditions.TargetPlatform)
+
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Unable to insert into database")
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
 	}
 
 	var id int64
@@ -52,7 +64,7 @@ func GetSponsoredPost(c echo.Context) error {
 
 	sqlStatement := `
       SELECT 
-        id, title, endAt, ageStart, ageEnd, targetGender, targetCountries, targetPlatforms  
+        id, title, startAt, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
       FROM 
         posts
       ORDER BY 
@@ -67,17 +79,18 @@ func GetSponsoredPost(c echo.Context) error {
 
 	row, err := db.Database.Query(sqlStatement, limit, offset)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Unable to query")
+		return c.String(http.StatusBadRequest, fmt.Sprintf("%v", err))
 	}
 
 	posts := []models.QueryItems{}
 
 	for row.Next() {
-		var post models.SponsoredPost
-		err := row.Scan(&post.Title, &post.EndAt, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &post.Conditions.TargetGender, &post.Conditions.TargetCountry, &post.Conditions.TargetPlatform)
+		post := models.SponsoredPost{}
+		var id uint64
+		err := row.Scan(&id, &post.Title, &post.StartAt, &post.EndAt, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &post.Conditions.TargetGender, &post.Conditions.TargetCountry, &post.Conditions.TargetPlatform)
 
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to scan")
+			log.Printf("Unable to row scan: %v\n", err)
 		}
 
 		if len(country) > 0 && post.Conditions.TargetCountry != country {
@@ -91,7 +104,7 @@ func GetSponsoredPost(c echo.Context) error {
 		if len(age) > 0 {
 			age, err := strconv.ParseUint(age, 10, 8)
 			if err != nil {
-				log.Fatalf("Unable to convert age")
+				log.Printf("Unable to convert age: %v\n", err)
 				return c.String(http.StatusBadRequest, "Age is not a proper integer")
 			}
 			if post.Conditions.AgeStart > age || post.Conditions.AgeEnd < age {

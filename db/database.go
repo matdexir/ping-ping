@@ -29,11 +29,12 @@ func (pdb *PostDB) Close() error {
 func (pdb *PostDB) CreateTable() error {
 
 	statement, err := pdb.Database.Prepare(`
-    CREATE TABLE IF NOT EXISTS people(
+    CREATE TABLE IF NOT EXISTS posts(
       id INTEGER PRIMARY KEY NOT NULL, 
-      title TEXT, startAt TEXT NOT NULL, 
+      title TEXT, 
+      startAt TEXT NOT NULL,
       endAt TEXT NOT NULL, 
-      ageStart INTEGER NOT NULL, 
+      ageStart INTEGER, 
       ageEnd INTEGER, 
       targetGender TEXT, 
       targetCountry TEXT, 

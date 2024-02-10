@@ -36,17 +36,17 @@ const (
 
 type SponsoredPost struct {
 	Title      string    `json:"title" validate:"required"`
-	StartAt    time.Time `json:"startAt" validate:"required,ltecsfield=EndAt"`
-	EndAt      time.Time `json:"endAt" validate:"required,gtecsfield=StartAt"`
+	StartAt    time.Time `json:"startAt" validate:"required"`
+	EndAt      time.Time `json:"endAt" validate:"required"`
 	Conditions Settings  `json:"conditions,omitempty"`
 }
 
 type Settings struct {
-	AgeStart       uint64   `json:"ageStart" validate:"ltecsfield=AgeEnd,gte=1,lte=125"`
-	AgeEnd         uint64   `json:"ageEnd" validate:"gtecsfield=AgeStart,gte=1,lte=125"`
+	AgeStart       uint64   `json:"ageStart" validate:"gte=1,lte=125"`
+	AgeEnd         uint64   `json:"ageEnd" validate:"gte=1,lte=125"`
 	TargetGender   Gender   `json:"gender"`
-	TargetCountry  Country  `json:"countries"`
-	TargetPlatform Platform `json:"platforms"`
+	TargetCountry  Country  `json:"country"`
+	TargetPlatform Platform `json:"platform"`
 }
 
 func (s *Settings) Validate() error {
