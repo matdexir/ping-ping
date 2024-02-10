@@ -13,17 +13,31 @@ type PostDB struct {
 	Database *sql.DB
 }
 
-func (p *PostDB) CreateTable() error {
-	statement, err := p.Database.Prepare(`
+func CreateConnection() (*PostDB, error) {
+	sql, err := sql.Open("sqlite3", "./db/file.db")
+	if err != nil {
+		fmt.Println("Unable to open database")
+		return nil, err
+	}
+	return &PostDB{Database: sql}, nil
+}
+
+func (pdb *PostDB) Close() error {
+	return pdb.Database.Close()
+}
+
+func (pdb *PostDB) CreateTable() error {
+
+	statement, err := pdb.Database.Prepare(`
     CREATE TABLE IF NOT EXISTS people(
-      id INTEGER PRIMARY KEY, 
-      title TEXT, startAt TEXT, 
-      endAt TEXT, 
-      ageStart INTEGER, 
+      id INTEGER PRIMARY KEY NOT NULL, 
+      title TEXT, startAt TEXT NOT NULL, 
+      endAt TEXT NOT NULL, 
+      ageStart INTEGER NOT NULL, 
       ageEnd INTEGER, 
       targetGender TEXT, 
-      targetCountries TEXT, 
-      targetPlatforms TEXT )`)
+      targetCountry TEXT, 
+      targetPlatform TEXT )`)
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to prepare statement")
@@ -31,6 +45,7 @@ func (p *PostDB) CreateTable() error {
 	}
 
 	_, err = statement.Exec()
+
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "unable to create table")
 		return err
