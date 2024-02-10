@@ -1,11 +1,15 @@
 package main
 
 import (
-	"net/http"
+	"database/sql"
+	"fmt"
+	// "net/http"
+	"os"
 	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"github.com/matdexir/ping-ping/controllers"
 	"github.com/matdexir/ping-ping/db"
 )
 
@@ -65,26 +69,28 @@ type QueryItems struct {
 	EndAt time.Time `json:"endAt" validate:"required"`
 }
 
-// func getSponsoredPost(c echo.Context) error {
-
-// 	offset := c.QueryParam("offset")
-// 	limit := c.QueryParam("limit")
-// 	age := c.QueryParam("age")
-// 	gender := c.QueryParam("gender")
-// 	country := c.QueryParam("country")
-// 	platform := c.QueryParam("platform")
-
-// 	return c.String(http.StatusOK, "")
-// }
-
-// func createSponsoredPost(c echo.Context) error {
-// 	return c.String(http.StatusOK, "")
-// }
+func newDB() (*db.PostDB, error) {
+	sql, err := sql.Open("sqlite3", "./db/file.db")
+	if err != nil {
+		fmt.Println("Unable to open database")
+		return nil, err
+	}
+	return &db.PostDB{Database: sql}, nil
+}
 
 func main() {
 	e := echo.New()
-	e.GET("/api/v1/ad", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, world.")
-	})
+
+	database, err := newDB()
+	if err != nil {
+		os.Exit(1)
+	}
+	err = database.CreateTable()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	e.POST("/api/v1/ad", controllers.CreateSponsoredPost)
+	e.GET("/api/v1/ad", controllers.GetSponsoredPost)
 	e.Logger.Fatal(e.Start(":8080"))
 }

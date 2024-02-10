@@ -9,12 +9,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type postDB struct {
-	db *sql.DB
+type PostDB struct {
+	Database *sql.DB
 }
 
-func (p *postDB) CreateTable() error {
-	statement, err := p.db.Prepare(`
+func (p *PostDB) CreateTable() error {
+	statement, err := p.Database.Prepare(`
     CREATE TABLE IF NOT EXISTS people(
       id INTEGER PRIMARY KEY, 
       title TEXT, startAt TEXT, 
