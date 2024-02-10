@@ -45,8 +45,8 @@ func TestUnmarshallNormalPost(t *testing.T) {
       "ageStart":20,
       "ageEnd":35,
       "gender":"M",
-      "countries":"JP",
-      "platforms":"iOS"
+      "country":"JP",
+      "platform":"iOS"
     }
   }`
 
@@ -101,8 +101,8 @@ func TestUnmarshallAgeOutOfBounds(t *testing.T) {
         "ageStart":0,
         "ageEnd":35,
         "gender":"M",
-        "countries":"JP",
-        "platforms":"iOS"
+        "country":"JP",
+        "platform":"iOS"
       }
     }`, `
     { 
@@ -113,8 +113,8 @@ func TestUnmarshallAgeOutOfBounds(t *testing.T) {
         "ageStart":1,
         "ageEnd":126,
         "gender":"M",
-        "countries":"JP",
-        "platforms":"iOS"
+        "country":"JP",
+        "platform":"iOS"
       }
     }`, `
     { 
@@ -125,8 +125,8 @@ func TestUnmarshallAgeOutOfBounds(t *testing.T) {
         "ageStart":45,
         "ageEnd":23,
         "gender":"M",
-        "countries":"JP",
-        "platforms":"iOS"
+        "country":"JP",
+        "platform":"iOS"
       }
     }`,
 	}

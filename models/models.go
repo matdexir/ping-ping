@@ -42,8 +42,8 @@ type SponsoredPost struct {
 }
 
 type Settings struct {
-	AgeStart       uint64   `json:"ageStart" validate:"gte=1,lte=125"`
-	AgeEnd         uint64   `json:"ageEnd" validate:"gte=1,lte=125"`
+	AgeStart       uint64   `json:"ageStart" validate:"gte=1,lte=125,ltecsfield=AgeEnd"`
+	AgeEnd         uint64   `json:"ageEnd" validate:"gte=1,lte=125,gtecsfield=AgeStart"`
 	TargetGender   Gender   `json:"gender"`
 	TargetCountry  Country  `json:"country"`
 	TargetPlatform Platform `json:"platform"`
