@@ -2,6 +2,9 @@ GO ?= go
 EXECUTABLE := ping-ping
 GOFILES := $(shell find . -type f -name "*.go")
 
+run: build
+	bin/$(EXECUTABLE)
+
 build: $(EXECUTABLE)
 
 $(EXECUTABLE): $(GOFILES)
