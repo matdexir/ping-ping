@@ -1,0 +1,13 @@
+services:
+  app:
+    image: ping-ping:latest
+    restart: always
+    ports:
+      - 127.0.0.1:8080:1234
+
+  
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
