@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"time"
 
-	// "os"
 	"strconv"
 
 	"github.com/matdexir/ping-ping/db"
@@ -22,7 +21,6 @@ func GetRAWJSON(body io.ReadCloser) map[string]interface{} {
 	_ = json.NewDecoder(body).Decode(&jsonBody)
 
 	return jsonBody
-
 }
 
 func CreateSponsoredPost(c echo.Context) error {

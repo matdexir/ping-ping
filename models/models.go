@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -40,6 +42,14 @@ const (
 // 	EndAt      string   `json:"endAt" validate:"required"`
 // 	Conditions Settings `json:"conditions,omitempty"`
 // }
+
+func Serialize(q interface{}) {
+	t := reflect.TypeOf(q)
+	v := reflect.ValueOf(q)
+
+	fmt.Println("Type:", t)
+	fmt.Println("Value:", v)
+}
 
 type SponsoredPost struct {
 	Title      string    `json:"title" validate:"required"`
