@@ -83,6 +83,9 @@ func getMap(hint Hint) map[string]SerializableItem {
 	}
 }
 
+// should I use generic?
+// SerializableItem needs to be a concrete type
+// however I am not too sure how to make it fit the requirement of both String()
 func Parse[T SerializableItem](item string, hint Hint) (T, bool) {
 	mp := getMap(hint)
 	value, ok := mp[strings.ToLower(item)]
