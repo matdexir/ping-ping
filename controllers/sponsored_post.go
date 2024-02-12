@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
+
 	// "os"
 	"strconv"
 
@@ -24,11 +26,13 @@ func GetRAWJSON(body io.ReadCloser) map[string]interface{} {
 }
 
 func CreateSponsoredPost(c echo.Context) error {
-	sp := models.SponsoredPost{}
+	sp := new(models.SponsoredPost)
 	if err := c.Bind(&sp); err != nil {
-		log.Printf("%v", GetRAWJSON(c.Request().Body))
-		return c.String(http.StatusBadRequest, "Unable to unmarshal json")
+		log.Printf("RAW: %v\n", GetRAWJSON(c.Request().Body))
+		return c.String(http.StatusBadRequest, fmt.Sprintf("%v", err))
 	}
+
+	log.Printf("Post is: %+v\n", sp)
 
 	db, _ := db.CreateConnection()
 	defer db.Close()
@@ -46,7 +50,7 @@ func CreateSponsoredPost(c echo.Context) error {
 	}
 
 	insertedPost := models.InsertedPost{
-		ID: id, Post: &sp}
+		ID: id, Post: sp}
 
 	return c.JSON(http.StatusOK, insertedPost)
 }
@@ -64,7 +68,7 @@ func GetSponsoredPost(c echo.Context) error {
 
 	sqlStatement := `
       SELECT 
-        id, title, startAt, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
+        id, title, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
       FROM 
         posts
       ORDER BY 
@@ -85,12 +89,19 @@ func GetSponsoredPost(c echo.Context) error {
 	posts := []models.QueryItems{}
 
 	for row.Next() {
-		post := models.SponsoredPost{}
+		post := new(models.SponsoredPost)
 		var id uint64
-		err := row.Scan(&id, &post.Title, &post.StartAt, &post.EndAt, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &post.Conditions.TargetGender, &post.Conditions.TargetCountry, &post.Conditions.TargetPlatform)
+		var endTime string
+
+		err := row.Scan(&id, &post.Title, &endTime, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &post.Conditions.TargetGender, &post.Conditions.TargetCountry, &post.Conditions.TargetPlatform)
 
 		if err != nil {
 			log.Printf("Unable to row scan: %v\n", err)
+		}
+
+		post.EndAt, err = time.Parse(time.DateTime, endTime[:len(endTime)-6])
+		if err != nil {
+			log.Printf("Unable to parse time: %v\n", err)
 		}
 
 		if len(country) > 0 && post.Conditions.TargetCountry != country {
@@ -113,6 +124,7 @@ func GetSponsoredPost(c echo.Context) error {
 		}
 
 		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
+		log.Printf("%v\n", tmp)
 
 		posts = append(posts, tmp)
 	}

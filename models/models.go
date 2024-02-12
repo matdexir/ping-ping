@@ -34,6 +34,13 @@ const (
 	WEB     Platform = "web"
 )
 
+// type SponsoredPostGuard struct {
+// 	Title      string   `json:"title" validate:"required"`
+// 	StartAt    string   `json:"startAt" validate:"required"`
+// 	EndAt      string   `json:"endAt" validate:"required"`
+// 	Conditions Settings `json:"conditions,omitempty"`
+// }
+
 type SponsoredPost struct {
 	Title      string    `json:"title" validate:"required"`
 	StartAt    time.Time `json:"startAt" validate:"required"`
