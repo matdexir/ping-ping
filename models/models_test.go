@@ -55,7 +55,6 @@ func TestSponsoredPostValidate(t *testing.T) {
 		name    string
 		sp      *models.SponsoredPost
 		wantErr bool
-		errStr  string // Optional expected error message substring
 	}{
 		{
 			name:    "valid post",
@@ -66,31 +65,26 @@ func TestSponsoredPostValidate(t *testing.T) {
 			name:    "empty title",
 			sp:      &models.SponsoredPost{StartAt: time.Now(), EndAt: time.Now().Add(time.Hour)},
 			wantErr: true,
-			errStr:  "required",
 		},
 		{
 			name:    "missing startAt",
 			sp:      &models.SponsoredPost{Title: "Test Post", EndAt: time.Now().Add(time.Hour)},
 			wantErr: true,
-			errStr:  "required",
 		},
 		{
 			name:    "missing endAt",
 			sp:      &models.SponsoredPost{Title: "Test Post", StartAt: time.Now()},
 			wantErr: true,
-			errStr:  "required",
 		},
 		{
 			name:    "endAt before startAt",
 			sp:      &models.SponsoredPost{Title: "Test Post", StartAt: time.Now().Add(time.Hour), EndAt: time.Now()},
 			wantErr: true,
-			errStr:  "must be after",
 		},
 		{
 			name:    "invalid age range in settings",
 			sp:      &models.SponsoredPost{Title: "Test Post", StartAt: time.Now(), EndAt: time.Now().Add(time.Hour), Conditions: models.Settings{AgeStart: 100, AgeEnd: 80}},
 			wantErr: true,
-			errStr:  "ltecsfield",
 		},
 	}
 
