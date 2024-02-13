@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"strconv"
+	// "strconv"
 
 	"github.com/matdexir/ping-ping/db"
 	"github.com/matdexir/ping-ping/models"
@@ -69,11 +69,57 @@ func GetSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Offset and/or Limit cannot be empty")
 	}
 
+	var whereClause string
+	var args []interface{}
+	addAnd := false
+
+	if age != "" {
+		whereClause += `ageStart <= ? AND ageEnd >= ? `
+		addAnd = true
+		args = append(args, age, age)
+	}
+
+	if country != "" {
+		if addAnd {
+			whereClause += `AND `
+			addAnd = false
+		}
+		whereClause += `targetCountry LIKE '%'||?||'%' `
+		addAnd = true
+		args = append(args, country)
+	}
+
+	if platform != "" {
+		if addAnd {
+			whereClause += `AND `
+			addAnd = false
+		}
+		whereClause += `targetPlatform LIKE '%'||?||'%' `
+		addAnd = true
+		args = append(args, platform)
+	}
+
+	if gender != "" {
+		if addAnd {
+			whereClause += `AND `
+			addAnd = false
+		}
+		whereClause += `targetGender LIKE '%'||?||'%' `
+		addAnd = true
+		args = append(args, gender)
+	}
+
 	sqlStatement := `
       SELECT 
         id, title, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
       FROM 
-        posts
+        posts`
+
+	if whereClause != "" {
+		sqlStatement += ` WHERE ` + whereClause
+	}
+
+	orderStatement := `
       ORDER BY 
         id 
       LIMIT 
@@ -81,10 +127,15 @@ func GetSponsoredPost(c echo.Context) error {
       OFFSET
         ?`
 
+	sqlStatement += orderStatement
+	args = append(args, limit, offset)
+
 	db, _ := db.CreateConnection()
 	defer db.Close()
 
-	row, err := db.Database.Query(sqlStatement, limit, offset)
+	fmt.Println(sqlStatement)
+
+	row, err := db.Database.Query(sqlStatement, args...)
 	if err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("%v", err))
 	}
@@ -128,53 +179,6 @@ func GetSponsoredPost(c echo.Context) error {
 		if err != nil {
 			log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
 			continue
-		}
-
-		// ok := slices.Contains(post.Conditions.TargetCountry, country)
-		ok := false
-		for _, c := range post.Conditions.TargetCountry {
-			if c.String() == country {
-				ok = true
-				break
-			}
-		}
-		if len(country) > 0 && !ok {
-			continue
-		}
-
-		ok = false
-		for _, c := range post.Conditions.TargetPlatform {
-			if c.String() == platform {
-				ok = true
-				break
-			}
-		}
-
-		if len(platform) > 0 && !ok {
-			continue
-		}
-
-		ok = false
-		for _, c := range post.Conditions.TargetGender {
-			if c.String() == gender {
-				ok = true
-				break
-			}
-		}
-
-		if len(gender) > 0 && !ok {
-			continue
-		}
-
-		if len(age) > 0 {
-			age, err := strconv.ParseUint(age, 10, 8)
-			if err != nil {
-				log.Printf("Unable to convert age: %v\n", err)
-				continue
-			}
-			if post.Conditions.AgeStart > age || post.Conditions.AgeEnd < age {
-				continue
-			}
 		}
 
 		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
