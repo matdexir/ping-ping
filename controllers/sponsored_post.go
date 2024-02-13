@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	// "slices"
 	"time"
 
 	"strconv"
@@ -59,6 +60,7 @@ func GetSponsoredPost(c echo.Context) error {
 	age := c.QueryParam("age")
 	country := c.QueryParam("country")
 	platform := c.QueryParam("platform")
+	gender := c.QueryParam("gender")
 
 	if offset == "" || limit == "" {
 		return c.String(http.StatusBadRequest, "Offset and/or Limit cannot be empty")
@@ -90,23 +92,70 @@ func GetSponsoredPost(c echo.Context) error {
 		post := new(models.SponsoredPost)
 		var id uint64
 		var endTime string
+		var targetCountry string
+		var targetPlatform string
+		var targetGender string
 
-		err := row.Scan(&id, &post.Title, &endTime, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &post.Conditions.TargetGender, &post.Conditions.TargetCountry, &post.Conditions.TargetPlatform)
+		err := row.Scan(&id, &post.Title, &endTime, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
 
 		if err != nil {
 			log.Printf("Unable to row scan: %v\n", err)
+			continue
 		}
 
 		post.EndAt, err = time.Parse(time.DateTime, endTime[:len(endTime)-6])
 		if err != nil {
 			log.Printf("Unable to parse time: %v\n", err)
-		}
-
-		if len(country) > 0 && post.Conditions.TargetCountry != country {
 			continue
 		}
 
-		if len(platform) > 0 && post.Conditions.TargetPlatform != platform {
+		post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
+		if err != nil {
+			log.Printf("Unable to deserialize country: %v\n", targetCountry)
+			continue
+		}
+
+		post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
+		if err != nil {
+			log.Printf("Unable to deserialize gender: %v\n", targetGender)
+			continue
+		}
+
+		post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
+		if err != nil {
+			log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
+			continue
+		}
+
+		// ok := slices.Contains(post.Conditions.TargetCountry, country)
+		ok := false
+		for _, c := range post.Conditions.TargetCountry {
+			if c.String() == country {
+				ok = true
+				break
+			}
+		}
+		if len(country) > 0 && !ok {
+			continue
+		}
+
+		ok = false
+		for _, c := range post.Conditions.TargetPlatform {
+			if c.String() == platform {
+				ok = true
+				break
+			}
+		}
+
+		ok = false
+		for _, c := range post.Conditions.TargetGender {
+			if c.String() == gender {
+				ok = true
+				break
+			}
+		}
+
+		if len(platform) > 0 && !ok {
 			continue
 		}
 
@@ -114,7 +163,7 @@ func GetSponsoredPost(c echo.Context) error {
 			age, err := strconv.ParseUint(age, 10, 8)
 			if err != nil {
 				log.Printf("Unable to convert age: %v\n", err)
-				return c.String(http.StatusBadRequest, "Age is not a proper integer")
+				continue
 			}
 			if post.Conditions.AgeStart > age || post.Conditions.AgeEnd < age {
 				continue
