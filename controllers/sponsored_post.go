@@ -147,6 +147,10 @@ func GetSponsoredPost(c echo.Context) error {
 			}
 		}
 
+		if len(platform) > 0 && !ok {
+			continue
+		}
+
 		ok = false
 		for _, c := range post.Conditions.TargetGender {
 			if c.String() == gender {
@@ -155,7 +159,7 @@ func GetSponsoredPost(c echo.Context) error {
 			}
 		}
 
-		if len(platform) > 0 && !ok {
+		if len(gender) > 0 && !ok {
 			continue
 		}
 
