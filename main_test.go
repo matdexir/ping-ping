@@ -94,6 +94,7 @@ func TestUnmarshallMissingFieldPost(t *testing.T) {
 }
 
 func TestUnmarshallAgeOutOfBounds(t *testing.T) {
+	t.Parallel()
 	testData := []string{`
     { 
       "title":"post1",
