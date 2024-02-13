@@ -184,9 +184,9 @@ func Deserialize[T SerializableItem](dbField string, hint Hint) ([]T, error) {
 
 type SponsoredPost struct {
 	Title      string    `json:"title" validate:"required"`
-	StartAt    time.Time `json:"startAt" validate:"required"`
-	EndAt      time.Time `json:"endAt" validate:"required"`
-	Conditions Settings  `json:"conditions,omitempty"`
+	StartAt    time.Time `json:"startAt" validate:"required,ltecsfield=EndAt"`
+	EndAt      time.Time `json:"endAt" validate:"required,gtecsfield=StartAt"`
+	Conditions Settings  `json:"conditions,omitempty" validate:"omitempty"`
 }
 
 type Settings struct {
@@ -198,12 +198,12 @@ type Settings struct {
 }
 
 func (s *Settings) Validate() error {
-	validate := validator.New()
+	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(s)
 }
 
 func (sp *SponsoredPost) Validate() error {
-	validate := validator.New()
+	validate := validator.New(validator.WithRequiredStructEnabled())
 	return validate.Struct(sp)
 }
 
