@@ -18,6 +18,8 @@ jobs:
         uses: actions/setup-go@v5
         with: 
           go-version: "^1"
+        env:
+          GO111MODULE: off
 
       - name: Checkout project
         uses: actions/checkout@v4
