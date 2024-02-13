@@ -69,6 +69,12 @@ func GetSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Offset and/or Limit cannot be empty")
 	}
 
+	sqlStatement := `
+      SELECT 
+        id, title, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
+      FROM 
+        posts`
+
 	var whereClause string
 	var args []interface{}
 	addAnd := false
@@ -82,7 +88,7 @@ func GetSponsoredPost(c echo.Context) error {
 	if country != "" {
 		if addAnd {
 			whereClause += `AND `
-			addAnd = false
+			// addAnd = false
 		}
 		whereClause += `targetCountry LIKE '%'||?||'%' `
 		addAnd = true
@@ -92,7 +98,7 @@ func GetSponsoredPost(c echo.Context) error {
 	if platform != "" {
 		if addAnd {
 			whereClause += `AND `
-			addAnd = false
+			// addAnd = false
 		}
 		whereClause += `targetPlatform LIKE '%'||?||'%' `
 		addAnd = true
@@ -102,18 +108,12 @@ func GetSponsoredPost(c echo.Context) error {
 	if gender != "" {
 		if addAnd {
 			whereClause += `AND `
-			addAnd = false
+			// addAnd = false
 		}
 		whereClause += `targetGender LIKE '%'||?||'%' `
 		addAnd = true
 		args = append(args, gender)
 	}
-
-	sqlStatement := `
-      SELECT 
-        id, title, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
-      FROM 
-        posts`
 
 	if whereClause != "" {
 		sqlStatement += ` WHERE ` + whereClause
