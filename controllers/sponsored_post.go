@@ -111,7 +111,7 @@ func GetSponsoredPost(c echo.Context) error {
 			// addAnd = false
 		}
 		whereClause += `targetGender LIKE '%'||?||'%' `
-		addAnd = true
+		// addAnd = true
 		args = append(args, gender)
 	}
 
