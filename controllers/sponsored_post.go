@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	// "slices"
 	"time"
 
 	"strconv"
@@ -36,8 +35,12 @@ func CreateSponsoredPost(c echo.Context) error {
 	db, _ := db.CreateConnection()
 	defer db.Close()
 
+	targetCountry := models.Serialize[models.Country](sp.Conditions.TargetCountry)
+	targetPlatform := models.Serialize[models.Platform](sp.Conditions.TargetPlatform)
+	targetGender := models.Serialize[models.Gender](sp.Conditions.TargetGender)
+
 	sqlStatement := `INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?)`
-	res, err := db.Database.Exec(sqlStatement, &sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &sp.Conditions.TargetGender, &sp.Conditions.TargetCountry, &sp.Conditions.TargetPlatform)
+	res, err := db.Database.Exec(sqlStatement, &sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))

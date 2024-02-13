@@ -14,14 +14,14 @@ BASE = {
         'conditions': {
             'ageStart': '',
             'ageEnd': '',
-            'gender': '',
-            'country': '',
-            'platform': ''
+            'gender': [],
+            'country': [],
+            'platform': []
             }
         }
 
-COUNTRIES = ['JP', 'FR', 'TW', 'US']
-GENDERS = ['M', 'F', 'A']
+COUNTRIES = ['JP', 'FR', 'TW', 'US', 'SA', 'BR']
+GENDERS = ['M', 'F']
 PLATFORMS = ['iOS', 'android', 'web']
 WORDS = ['ad', 'post', 'advert', 'money']
 URL = "http://localhost:8080/api/v1/ad"
@@ -57,13 +57,13 @@ def create_new_entry():
     entry['startAt'] = start_date
     entry['endAt'] = end_date
 
-    gender = random.choice(GENDERS)
+    gender = random.sample(GENDERS, random.randint(1, 2))
     entry['conditions']['gender'] = gender
 
-    country = random.choice(COUNTRIES)
+    country = random.sample(COUNTRIES, random.randint(1, 4))
     entry['conditions']['country'] = country
 
-    platform = random.choice(PLATFORMS)
+    platform = random.sample(PLATFORMS, random.randint(1, 3))
     entry['conditions']['platform'] = platform
 
     return entry
@@ -71,8 +71,9 @@ def create_new_entry():
 
 def send_request():
     headers = {'Content-type': 'application/json'}
-    for _ in range(1000):
+    for _ in range(10000):
         json_dump = json.dumps(create_new_entry(), default=str)
+        # print(json_dump)
         resp = requests.post(URL, data=json_dump, headers=headers)
         print(resp.content)
 

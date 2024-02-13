@@ -170,7 +170,7 @@ func Serialize[T SerializableItem](items []T) string {
 
 func Deserialize[T SerializableItem](dbField string, hint Hint) ([]T, error) {
 	enums := []T{}
-	splitField := strings.Split(dbField, ",")
+	splitField := strings.Split(dbField, ", ")
 
 	for _, split := range splitField {
 		parsed, ok := Parse[T](split, hint)
