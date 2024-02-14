@@ -1,11 +1,11 @@
 import json
+from aiohttp.client import ClientSession
 import requests
+import asyncio
+import aiohttp
 import random
 import copy
-from threading import Thread
-from queue import Queue
 from datetime import datetime, timedelta
-from rfc3339 import RFC3339
 
 BASE = {
         'title': "",
@@ -25,6 +25,8 @@ GENDERS = ['M', 'F']
 PLATFORMS = ['iOS', 'android', 'web']
 WORDS = ['ad', 'post', 'advert', 'money']
 URL = "http://localhost:8080/api/v1/ad"
+
+results = []
 
 def add_months(current_date: datetime, months_to_add: int) -> datetime:
     new_date = datetime(current_date.year + (current_date.month + months_to_add - 1) // 12,
@@ -69,14 +71,25 @@ def create_new_entry():
     return entry
 
 
-def send_request():
-    headers = {'Content-type': 'application/json'}
-    for _ in range(10000):
+
+
+def get_tasks(session: ClientSession, amount: int = 1000):
+    tasks = []
+    for _ in range(amount):
         json_dump = json.dumps(create_new_entry(), default=str)
-        # print(json_dump)
-        resp = requests.post(URL, data=json_dump, headers=headers)
-        print(resp.content)
+        tasks.append(session.post(URL, data=json_dump))
+    return tasks
+
+async def send_requests():
+    headers = {'Content-type': 'application/json'}
+    async with aiohttp.ClientSession(headers=headers) as session:
+        tasks = get_tasks(session)
+        responses = await asyncio.gather(*tasks)
+        for resp in responses:
+            results.append(await resp.text())
 
 
 if __name__ == "__main__":
-    send_request()
+    asyncio.run(send_requests())
+    for result in results:
+        print(result)
