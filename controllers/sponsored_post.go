@@ -39,8 +39,15 @@ func CreateSponsoredPost(c echo.Context) error {
 	targetPlatform := models.Serialize[models.Platform](sp.Conditions.TargetPlatform)
 	targetGender := models.Serialize[models.Gender](sp.Conditions.TargetGender)
 
-	sqlStatement := `INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?)`
-	res, err := db.Database.Exec(sqlStatement, &sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
+	sqlRawString := `INSERT INTO posts VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	stmt, err := db.Database.Prepare(sqlRawString)
+
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
+	}
+
+	res, err := stmt.Exec(&sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
@@ -69,7 +76,7 @@ func GetSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Offset and/or Limit cannot be empty")
 	}
 
-	sqlStatement := `
+	sqlRawString := `
       SELECT 
         id, title, endAt, ageStart, ageEnd, targetGender, targetCountry, targetPlatform  
       FROM 
@@ -116,7 +123,7 @@ func GetSponsoredPost(c echo.Context) error {
 	}
 
 	if whereClause != "" {
-		sqlStatement += ` WHERE ` + whereClause
+		sqlRawString += ` WHERE ` + whereClause
 	}
 
 	orderStatement := `
@@ -127,15 +134,20 @@ func GetSponsoredPost(c echo.Context) error {
       OFFSET
         ?`
 
-	sqlStatement += orderStatement
+	sqlRawString += orderStatement
 	args = append(args, limit, offset)
 
+	fmt.Println(sqlRawString)
 	db, _ := db.CreateConnection()
 	defer db.Close()
 
-	fmt.Println(sqlStatement)
+	stmt, err := db.Database.Prepare(sqlRawString)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
+	}
 
-	row, err := db.Database.Query(sqlStatement, args...)
+	row, err := stmt.Query(args...)
+
 	if err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("%v", err))
 	}
@@ -163,23 +175,24 @@ func GetSponsoredPost(c echo.Context) error {
 			continue
 		}
 
-		post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
-		if err != nil {
-			log.Printf("Unable to deserialize country: %v\n", targetCountry)
-			continue
-		}
 
-		post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
-		if err != nil {
-			log.Printf("Unable to deserialize gender: %v\n", targetGender)
-			continue
-		}
+		// post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
+		// if err != nil {
+		// 	log.Printf("Unable to deserialize country: %v\n", targetCountry)
+		// 	continue
+		// }
 
-		post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
-		if err != nil {
-			log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
-			continue
-		}
+		// post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
+		// if err != nil {
+		// 	log.Printf("Unable to deserialize gender: %v\n", targetGender)
+		// 	continue
+		// }
+
+		// post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
+		// if err != nil {
+		// 	log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
+		// 	continue
+		// }
 
 		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
 		log.Printf("%v\n", tmp)
