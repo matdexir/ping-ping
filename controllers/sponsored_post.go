@@ -174,23 +174,23 @@ func GetSponsoredPost(c echo.Context) error {
 			continue
 		}
 
-		post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
-		if err != nil {
-			log.Printf("Unable to deserialize country: %v\n", targetCountry)
-			continue
-		}
+		// post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
+		// if err != nil {
+		// 	log.Printf("Unable to deserialize country: %v\n", targetCountry)
+		// 	continue
+		// }
 
-		post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
-		if err != nil {
-			log.Printf("Unable to deserialize gender: %v\n", targetGender)
-			continue
-		}
+		// post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
+		// if err != nil {
+		// 	log.Printf("Unable to deserialize gender: %v\n", targetGender)
+		// 	continue
+		// }
 
-		post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
-		if err != nil {
-			log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
-			continue
-		}
+		// post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
+		// if err != nil {
+		// 	log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
+		// 	continue
+		// }
 
 		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
 		log.Printf("%v\n", tmp)
