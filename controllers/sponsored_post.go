@@ -147,6 +147,7 @@ func GetSponsoredPost(c echo.Context) error {
 	}
 
 	row, err := stmt.Query(args...)
+
 	if err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("%v", err))
 	}
@@ -173,6 +174,7 @@ func GetSponsoredPost(c echo.Context) error {
 			log.Printf("Unable to parse time: %v\n", err)
 			continue
 		}
+
 
 		// post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
 		// if err != nil {
