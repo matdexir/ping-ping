@@ -47,7 +47,7 @@ func CreateSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
 	}
 
-	res, err := stmt.Exec(sqlRawString, &sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
+	res, err := stmt.Exec(&sp.Title, &sp.StartAt, &sp.EndAt, &sp.Conditions.AgeStart, &sp.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))

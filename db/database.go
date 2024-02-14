@@ -4,6 +4,7 @@ import (
 	// "context"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -16,7 +17,12 @@ type PostDB struct {
 func CreateConnection() (*PostDB, error) {
 	sql, err := sql.Open("sqlite3", "./db/file.db")
 	if err != nil {
-		fmt.Println("Unable to open database")
+		log.Println("Unable to open database")
+		return nil, err
+	}
+
+	if err = sql.Ping(); err != nil {
+		log.Println("Unable to ping the database")
 		return nil, err
 	}
 	return &PostDB{Database: sql}, nil
