@@ -11,6 +11,12 @@
 # Binary directory
 bin/
 
+# Python modules
+stress-test/*
+!stress-test/post.py
+!stress-test/rfc3339.py
+!stress-test/requirements.txt
+
 # Test binary, built with `go test -c`
 *.test
 
