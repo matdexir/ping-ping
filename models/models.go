@@ -212,6 +212,11 @@ type QueryItems struct {
 	EndAt time.Time `json:"endAt" validate:"required"`
 }
 
+type QueryCache struct {
+	Parameters string
+	Items      []QueryItems
+}
+
 type InsertedPost struct {
 	ID   int64
 	Post *SponsoredPost
