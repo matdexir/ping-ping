@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	// "log"
 	"strings"
 	"time"
 
@@ -150,7 +150,7 @@ func getMap(hint Hint) map[string]SerializableItem {
 func Parse[T SerializableItem](item string, hint Hint) (interface{}, bool) {
 	mp := getMap(hint)
 	value, ok := mp[strings.ToLower(item)]
-	log.Printf("%v: %v\n", item, mp)
+	// log.Printf("%v: %v\n", item, mp)
 	if !ok {
 		return nil, false
 	}
