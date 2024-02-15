@@ -1,14 +1,13 @@
 package controllers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"time"
-
-	// "strconv"
 
 	"github.com/matdexir/ping-ping/db"
 	"github.com/matdexir/ping-ping/models"
@@ -95,7 +94,6 @@ func GetSponsoredPost(c echo.Context) error {
 	if country != "" {
 		if addAnd {
 			whereClause += `AND `
-			// addAnd = false
 		}
 		whereClause += `targetCountry LIKE '%'||?||'%' `
 		addAnd = true
@@ -105,7 +103,6 @@ func GetSponsoredPost(c echo.Context) error {
 	if platform != "" {
 		if addAnd {
 			whereClause += `AND `
-			// addAnd = false
 		}
 		whereClause += `targetPlatform LIKE '%'||?||'%' `
 		addAnd = true
@@ -115,10 +112,8 @@ func GetSponsoredPost(c echo.Context) error {
 	if gender != "" {
 		if addAnd {
 			whereClause += `AND `
-			// addAnd = false
 		}
 		whereClause += `targetGender LIKE '%'||?||'%' `
-		// addAnd = true
 		args = append(args, gender)
 	}
 
@@ -137,7 +132,6 @@ func GetSponsoredPost(c echo.Context) error {
 	sqlRawString += orderStatement
 	args = append(args, limit, offset)
 
-	fmt.Println(sqlRawString)
 	db, _ := db.CreateConnection()
 	defer db.Close()
 
@@ -146,7 +140,7 @@ func GetSponsoredPost(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
 	}
 
-	row, err := stmt.Query(args...)
+	rows, err := stmt.Query(args...)
 
 	if err != nil {
 		return c.String(http.StatusBadRequest, fmt.Sprintf("%v", err))
@@ -154,15 +148,15 @@ func GetSponsoredPost(c echo.Context) error {
 
 	posts := []models.QueryItems{}
 
-	for row.Next() {
+	for rows.Next() {
 		post := new(models.SponsoredPost)
 		var id uint64
 		var endTime string
-		var targetCountry string
-		var targetPlatform string
-		var targetGender string
+		var targetCountry sql.NullString
+		var targetPlatform sql.NullString
+		var targetGender sql.NullString
 
-		err := row.Scan(&id, &post.Title, &endTime, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
+		err := rows.Scan(&id, &post.Title, &endTime, &post.Conditions.AgeStart, &post.Conditions.AgeEnd, &targetGender, &targetCountry, &targetPlatform)
 
 		if err != nil {
 			log.Printf("Unable to row scan: %v\n", err)
@@ -175,29 +169,14 @@ func GetSponsoredPost(c echo.Context) error {
 			continue
 		}
 
-
-		// post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
-		// if err != nil {
-		// 	log.Printf("Unable to deserialize country: %v\n", targetCountry)
-		// 	continue
-		// }
-
-		// post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
-		// if err != nil {
-		// 	log.Printf("Unable to deserialize gender: %v\n", targetGender)
-		// 	continue
-		// }
-
-		// post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
-		// if err != nil {
-		// 	log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
-		// 	continue
-		// }
-
 		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
 		log.Printf("%v\n", tmp)
 
 		posts = append(posts, tmp)
+	}
+
+	if err = rows.Err(); err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("%v", err))
 	}
 
 	return c.JSON(http.StatusOK, posts)
