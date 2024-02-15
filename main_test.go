@@ -30,8 +30,8 @@ func TestMarshallNormalPost(t *testing.T) {
 		},
 	}
 
-	data, err := json.Marshal(normal_post)
-	t.Log(string(data))
+	_, err := json.Marshal(normal_post)
+	// t.Log(string(data))
 	require.NoError(t, err)
 
 }
@@ -85,7 +85,7 @@ func TestUnmarshallMissingFieldPost(t *testing.T) {
   }`
 	var post models.SponsoredPost
 	err := json.Unmarshal([]byte(data), &post)
-	t.Log(post)
+	// t.Log(post)
 	require.NoError(t, err)
 
 	err = post.Validate()
