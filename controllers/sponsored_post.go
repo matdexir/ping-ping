@@ -11,6 +11,7 @@ import (
 	// "strconv"
 
 	"github.com/matdexir/ping-ping/db"
+	"github.com/matdexir/ping-ping/memcached"
 	"github.com/matdexir/ping-ping/models"
 
 	"github.com/labstack/echo/v4"
@@ -71,9 +72,17 @@ func GetSponsoredPost(c echo.Context) error {
 	country := c.QueryParam("country")
 	platform := c.QueryParam("platform")
 	gender := c.QueryParam("gender")
+	params := c.QueryParams()
 
 	if offset == "" || limit == "" {
 		return c.String(http.StatusBadRequest, "Offset and/or Limit cannot be empty")
+	}
+
+	mc, _ := memcached.NewMemcached()
+	defer mc.Close()
+	items, err := mc.GetPosts(params.Encode())
+	if err == nil {
+		return c.JSON(http.StatusOK, items.Items)
 	}
 
 	sqlRawString := `
@@ -175,30 +184,13 @@ func GetSponsoredPost(c echo.Context) error {
 			continue
 		}
 
-
-		// post.Conditions.TargetCountry, err = models.Deserialize[models.Country](targetCountry, models.CountryHint)
-		// if err != nil {
-		// 	log.Printf("Unable to deserialize country: %v\n", targetCountry)
-		// 	continue
-		// }
-
-		// post.Conditions.TargetGender, err = models.Deserialize[models.Gender](targetGender, models.GenderHint)
-		// if err != nil {
-		// 	log.Printf("Unable to deserialize gender: %v\n", targetGender)
-		// 	continue
-		// }
-
-		// post.Conditions.TargetPlatform, err = models.Deserialize[models.Platform](targetPlatform, models.PlatformHint)
-		// if err != nil {
-		// 	log.Printf("Unable to deserialize gender: %v\n", targetPlatform)
-		// 	continue
-		// }
-
 		tmp := models.QueryItems{Title: post.Title, EndAt: post.EndAt}
 		log.Printf("%v\n", tmp)
 
 		posts = append(posts, tmp)
 	}
+
+	_ = mc.SetPosts(models.QueryCache{Parameters: params.Encode(), Items: posts})
 
 	return c.JSON(http.StatusOK, posts)
 
