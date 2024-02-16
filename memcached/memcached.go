@@ -3,7 +3,7 @@ package memcached
 import (
 	"bytes"
 	"encoding/gob"
-	"os"
+	// "os"
 	"time"
 
 	"github.com/bradfitz/gomemcache/memcache"
@@ -15,7 +15,8 @@ type Client struct {
 }
 
 func NewMemcached() (*Client, error) {
-	client := memcache.New(os.Getenv("MEMCACHED"))
+	connStr := "127.0.0.1:8002"
+	client := memcache.New(connStr)
 
 	if err := client.Ping(); err != nil {
 		return nil, err

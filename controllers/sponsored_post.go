@@ -82,6 +82,7 @@ func GetSponsoredPost(c echo.Context) error {
 	defer mc.Close()
 	items, err := mc.GetPosts(params.Encode())
 	if err == nil {
+		log.Printf("Logging from cache.\n")
 		return c.JSON(http.StatusOK, items.Items)
 	}
 

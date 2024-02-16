@@ -24,7 +24,7 @@ COUNTRIES = ['JP', 'FR', 'TW', 'US', 'SA', 'BR']
 GENDERS = ['M', 'F']
 PLATFORMS = ['iOS', 'android', 'web']
 WORDS = ['ad', 'post', 'advert', 'money']
-URL = "http://localhost:8080/api/v1/ad"
+URL = "http://0.0.0.0:8000/api/v1/ad"
 
 results = []
 

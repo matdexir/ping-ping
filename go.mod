@@ -3,7 +3,9 @@ module github.com/matdexir/ping-ping
 go 1.21.7
 
 require (
+	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874
 	github.com/go-playground/validator/v10 v10.18.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/mattn/go-sqlite3 v1.14.22
 	github.com/stretchr/testify v1.8.4

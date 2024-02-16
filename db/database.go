@@ -15,14 +15,17 @@ type PostDB struct {
 }
 
 func CreateConnection() (*PostDB, error) {
+	// connStr := "postgresql://postgres:postgres@127.0.0.1:8001/posts?sslmode=disable"
+	// connStr := "host=0.0.0.0 port=8001 user=postgres password=postgres dbname=posts sslmode=disable"
 	sql, err := sql.Open("sqlite3", "./db/file.db")
+	// sql, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Println("Unable to open database")
 		return nil, err
 	}
 
 	if err = sql.Ping(); err != nil {
-		log.Println("Unable to ping the database")
+		log.Printf("Unable to ping the database: %v\n", err)
 		return nil, err
 	}
 	return &PostDB{Database: sql}, nil
