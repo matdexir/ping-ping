@@ -27,5 +27,5 @@ func main() {
 
 	e.POST("/api/v1/ad", controllers.CreateSponsoredPost)
 	e.GET("/api/v1/ad", controllers.GetSponsoredPost)
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":8000"))
 }
